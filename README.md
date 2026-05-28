@@ -1,91 +1,71 @@
-# Snake Game — Dual-Mode Emoji Terminal Edition
+# Snake Game / 贪吃蛇
 
 > **This project is 100% AI-generated** using [Claude Code](https://claude.ai/code).
 > All code, documentation, and design were produced through human-AI collaboration.
+>
+> **本项目 100% 由 AI 生成**，使用 [Claude Code](https://claude.ai/code)。所有代码、文档和设计均由人机协作完成。
 
-> C Language + Win32 Console | Circular Buffer | Zero Dynamic Allocation | O(1) All Operations
+---
 
-## Layout
+## Overview / 概述
 
-```
-+--------------------------------------+
-|           S N A K E                  |
-+--------------------------------------+
-  [Brown border enclosing a 20x20 grid]
-  Items: Apple, Bombs, Scissors
-  Snake: Green squares
+A classic snake game written in C for the Windows console, featuring emoji visuals, two game modes, difficulty settings, and multiple power-ups.
 
-  Length: 3      [Easy]     Bombs: 1
-  WASD to move | Q to pause | R to reset
-```
+用 C 语言编写的 Windows 控制台贪吃蛇游戏，支持 emoji 视觉、双模式、难度选择和多种道具。
 
-> For best visual results, run in a terminal. Emoji widths may vary in web browsers.
+---
 
-## Menu Flow
+## Game Modes / 游戏模式
 
-```
-Main Menu → Game Mode → Difficulty → Play
-```
+| Mode / 模式 | Bombs / 炸弹 | Scissors / 剪刀 | Description / 描述 |
+|-------------|:------------:|:---------------:|---------------------|
+| **Classic / 经典** | No / 无 | No / 无 | Traditional snake, eat apples to grow / 经典贪吃蛇，吃苹果长长 |
+| **Bomb Frenzy / 炸弹狂欢** | Yes / 有 | Yes / 有 | Bombs never disappear, they keep piling up / 炸弹不消失，越积越多 |
 
-## Two Game Modes
+## Difficulty / 难度
 
-| Mode | Bombs | Scissors | Description |
-|------|:-----:|:--------:|-------------|
-| **Classic** | No | No | Traditional snake, eat apples to grow |
-| **Bomb Frenzy** | Yes | Yes | Bombs never disappear, they keep piling up! |
+| Difficulty / 难度 | Speed / 速度 | Classic + Hard / 经典困难 | Frenzy + Hard / 狂欢困难 |
+|-------------------|:-----------:|---------------------------|--------------------------|
+| **Easy / 简单** | 150ms | No bombs / 无炸弹 | Bomb interval 5→1 / 炸弹每5→1苹果 |
+| **Hard / 困难** | 80ms | 1 bomb every 5 apples / 每5苹果1炸弹 | Interval 3→1, double spawn, more scissors / 3→1递减, 一次两颗, 剪刀更频繁 |
 
-## Difficulty System
+## Items / 道具
 
-| Difficulty | Speed | Classic + Hard | Frenzy + Hard |
-|------------|:----:|----------------|---------------|
-| **Easy** | 150ms | No bombs | Bomb interval 5→1 (decreasing) |
-| **Hard** | 80ms | 1 bomb every 5 apples | Bomb interval 3→1, double spawn! Scissors more frequent |
+| Item / 道具 | Icon / 图标 | Description / 描述 |
+|-------------|:-----------:|---------------------|
+| Apple / 苹果 | 🍎 | +1 length, respawns / 长度+1，刷新位置 |
+| Bomb / 炸弹 | 💣 | Instant death / 吃到即死 |
+| Scissors / 剪刀 | ✂️ | Clear half the bombs (Frenzy-only) / 清除一半炸弹（狂欢专属） |
+| Snake body / 蛇身 | 🟩 | Green square / 绿色方块 |
+| Wall / 墙 | 🟫 | Border collision = death / 撞墙即死 |
 
-## Items
+## Controls / 操作
 
-| Item | Icon | Description |
-|------|:----:|-------------|
-| Apple | 🍎 | +1 length, respawns elsewhere |
-| Bomb | 💣 | Instant death! In Frenzy mode, bombs **never disappear** |
-| Scissors | ✂️ | Clears **half** the bombs on screen (Frenzy-only) |
-| Snake | 🟩 | Green square body, starts at length 1 |
-| Wall | 🟫 | Brown border, collision = death |
+| Key / 按键 | Action / 功能 |
+|------------|---------------|
+| `W` `A` `S` `D` | Move / 移动 |
+| `Arrow Keys / 方向键` | Move / 移动 |
+| `Q` | Pause / Resume / 暂停继续 |
+| `R` | Restart / 重新开始 |
+| `Esc` | Back to menu / 返回上级菜单 |
 
-## Controls
+## Technical Highlights / 技术亮点
 
-| Key | Action |
-|-----|--------|
-| `W` `A` `S` `D` | Move direction |
-| `Arrow Keys` | Move direction |
-| `Q` | Pause / Resume |
-| `R` | Restart |
-| `Esc` | Return to previous menu |
+| Feature / 特性 | Implementation / 实现 |
+|----------------|----------------------|
+| Body storage / 蛇身存储 | Circular buffer, zero `malloc`/`free` / 循环缓冲区，零动态分配 |
+| Collision / 碰撞检测 | `occupied[][]` boolean grid, O(1) / 布尔网格 |
+| Frame timing / 帧率 | `GetTickCount()`, unaffected by snake length / 稳定 tick |
+| Screen refresh / 刷屏 | `FillConsoleOutput` API, flicker-free / 无闪烁 |
+| Apple spawn / 苹果生成 | Center-weighted random, 85% less likely near border / 距中心加权 |
+| Emoji / 表情 | UTF-8 encoded / UTF-8 编码 |
 
-## Death / Victory
-
-- 💥 **Hit the wall** — touched the border
-- 💥 **Hit yourself** — head collided with body
-- 💥 **Bomb** — ate a bomb
-- 🎉 **Victory** — snake filled the entire 20x20 = 400 cells!
-
-## Technical Highlights
-
-| Feature | Implementation |
-|---------|---------------|
-| Body storage | Circular buffer array, zero `malloc`/`free` |
-| Collision detection | `occupied[][]` boolean grid, O(1) |
-| Frame timing | `GetTickCount()` stable tick, unaffected by snake length |
-| Screen refresh | `FillConsoleOutput` API, flicker-free |
-| Apple spawning | Center-weighted random distribution (border cells 85% less likely) |
-| Emoji rendering | UTF-8 encoded, full emoji visuals |
-
-## Build
+## Build / 编译
 
 ```powershell
-# Requires GCC (MinGW-w64)
 gcc -O2 -Wall snake.c -o snake.exe -lm
 ```
 
-## License
+## License / 许可证
 
 MIT License
